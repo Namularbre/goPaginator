@@ -86,3 +86,41 @@ func TestNewPaginator(t *testing.T) {
 		t.Fatalf("err: the paginator is not build properly, time to debug !")
 	}
 }
+
+func PreparePaginator() *Paginator[userForTesting] {
+	return NewPaginator(PrepareTestData(), 0, 2)
+}
+
+func TestPaginator_GetPageZero(t *testing.T) {
+	paginator := PreparePaginator()
+	assertPage := Page[userForTesting]{
+		Content: []userForTesting{
+			{
+				Id:       0,
+				Username: "Dupond",
+				Age:      69,
+			},
+			{
+				Id:       1,
+				Username: "Dupont",
+				Age:      96,
+			},
+		},
+		Previous: -1,
+		Next:     1,
+	}
+	page := paginator.GetPage(0)
+
+	if page.Next != assertPage.Next || page.Previous != assertPage.Previous || !slices.Equal(page.Content, assertPage.Content) {
+		t.Fatalf("error with getPage(0), time to debug.")
+	}
+}
+
+func TestPaginator_GetPageNil(t *testing.T) {
+	paginator := NewPaginator(PrepareTestData(), 0, 2)
+	page := paginator.GetPage(999)
+
+	if page != nil {
+		t.Fatalf("error, page should be nil, for %v", page)
+	}
+}
